@@ -81,10 +81,10 @@ void seguidor(){
   if(estadocen==0 && estadoizq==1 && estadoder==1){
     adelante();
   }
-  else if (estadocen==0 && estadoizq==1 && estadoder==0){
+  else if (estadocen==1 && estadoizq==1 && estadoder==0){
     izquierda();
   }
-  else if(estadocen==0 && estadoizq==0 && estadoder==1){
+  else if(estadocen==1 && estadoizq==0 && estadoder==1){
     derecha();
   }
 }
