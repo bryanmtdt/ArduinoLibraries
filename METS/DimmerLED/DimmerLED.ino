@@ -17,7 +17,7 @@ Este ejemplo servirá como ejemplo para la demostración de:
 
 int led = 9;         // PIN de PWM donde realizará el control del pin
 int brillo = 0;     // brillo que tiene el LED
-int dimmer = 5;    // Puntos de brillo que tiene
+int dimmer = 4;    // Puntos de brillo que tiene
 int del= 30;      // Tiempo de espera para la iteración
 
 // Configuración que sólo se realiza una vez

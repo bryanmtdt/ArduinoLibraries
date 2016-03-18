@@ -23,6 +23,7 @@ const int dervel=6;
 const int derdir=11;
 const int sensorder=7;
 const int sensorizq=4;
+const int sensorcen=12;
 
 void setup() {
   pinMode(izqvel,OUTPUT);
@@ -31,6 +32,7 @@ void setup() {
   pinMode(derdir,OUTPUT);
   pinMode(sensorder,INPUT);
   pinMode(sensorizq,INPUT);
+  pinMode(sensorcen,INPUT);
 }
 
 void loop() {
@@ -74,13 +76,15 @@ void izquierda(){
 void seguidor(){
   int estadoizq=digitalRead(sensorizq);
   int estadoder=digitalRead(sensorder);
-  if(estadoizq==1 && estadoder==1){
+  int estadocen=digitalRead(sensorcen);
+  
+  if(estadocen==0 && estadoizq==1 && estadoder==1){
     adelante();
   }
-  else if (estadoizq==1 && estadoder==0){
+  else if (estadocen==0 && estadoizq==1 && estadoder==0){
     izquierda();
   }
-  else if(estadoizq==0 && estadoder==1){
+  else if(estadocen==0 && estadoizq==0 && estadoder==1){
     derecha();
   }
 }
