@@ -1,6 +1,5 @@
 /*
  Ejemplo Básico de MQTT con un ESP8266
- Basic ESP8266 MQTT example
 
  Primeros pasos:
  -Añada el siguiente enlace 
@@ -33,8 +32,8 @@ void setup() {
   Serial.begin(115200);
   Serial.println("Starting");
   setup_wifi();
-  client.setServer(mqtt_server, 14619);
-  client.setCallback(callback);
+  client.setServer(mqtt_server, 14619); //Función para conectarse con el servidor MQTT
+  client.setCallback(callback); //Función para escuchar publicaciones del servidor
 }
 
 void setup_wifi() {
@@ -57,6 +56,7 @@ void setup_wifi() {
   Serial.println(WiFi.localIP());
 }
 
+//Función para escuchar publicaciones del servidor
 void callback(char* topic, byte* payload, unsigned int length) {
   Serial.print("Message arrived [");
   Serial.print(topic);
@@ -77,33 +77,38 @@ void callback(char* topic, byte* payload, unsigned int length) {
 
 }
 
+//Ciclo para reconexión
 void reconnect() {
-  // Loop until we're reconnected
+ 
   while (!client.connected()) {
     Serial.print("Attempting MQTT connection...");
-    // Attempt to connect  
+    
+    //Intenta conectarse con el servidor
     if (client.connect("ESP8266Client", userMQTT, passwordMQTT)) {
       Serial.println("connected");
-      // Once connected, publish an announcement...
+      // Si se conecta publica un mensaje
       client.publish("imaginexyz/listen", "AK7");
-      // ... and resubscribe
+      // Y se subscribe a un tema
       client.subscribe("imaginexyz/connected");
     } else {
       Serial.print("failed, rc=");
       Serial.print(client.state());
       Serial.println(" try again in 5 seconds");
-      // Wait 5 seconds before retrying
       delay(5000);
     }
   }
 }
 void loop() {
 
+  // Si no está conectado se intenta conectar
   if (!client.connected()) {
     reconnect();
   }
+  
+  // Se mantiene enciclado para seguir recibiendo datos
   client.loop();
-
+ 
+  // Cada 2 segundos se genera un mensaje para publicar en el servidor
   long now = millis();
   if (now - lastMsg > 2000) {
     lastMsg = now;
