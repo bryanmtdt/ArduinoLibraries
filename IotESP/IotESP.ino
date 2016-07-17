@@ -9,7 +9,7 @@ String conectar = "AT+CWJAP=\"SSID\",\"PASS\""; //Comando AT para conectarse a u
 String server = "AT+CIPSTART=\"TCP\",\"https://imaginexyz-genuinoday.herokuapp.com\",80"; //Comando AT para establecer conexión con el servidor
 String trama; //Variable donde se almacenará el comando AT para establecer la longitud del mensaje
 String post = "POST /imaginexyz/genuinodayq/?dato1=imagineXYZ&dato2=ROCKEA HTTP/1.1\r\nHost: imaginexyz-genuinoday.herokuapp.com:80\r\n\r\n"; //Secuencia de solicitud POST
-
+String POSTA = "POST /imaginexyz/genuinodayb/ HTTP/1.1\r\nHost: imaginexyz-genuinoday.herokuapp.com:80\r\nAccept: application/json\r\nContent-Type: application/json\r\nContent-Length: ";
 void setup() {
   Serial.begin(9600); //Inicializar puerto serial
   mySerial.begin(9600); //Inicializar puerto de comunicación con el ESP
@@ -52,6 +52,20 @@ void leer() {
   Serial.print(data);
   data = "";
 }
+
+bool findOK(){                      //Función que permite verificar el resultado "OK" del comando AT 
+    if(Serial1.find("OK"))          // Si se localiza OK en la respuesta del ESP8266
+    {
+    SerialUSB.println("Server OK"); // El comando se ejecutó correctamente
+    return true;                    // Devuelve "True"
+     }
+    else
+    {
+    SerialUSB.println("No Server"); // Si ha ocurrido un error
+    return false;                   // Retorna "False"
+     }
+}
+
 
 void loop() {
   // put your main code here, to run repeatedly:
