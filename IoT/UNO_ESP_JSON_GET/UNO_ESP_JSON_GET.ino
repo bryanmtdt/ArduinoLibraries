@@ -9,20 +9,20 @@ SoftwareSerial mySerial(3, 2); //Pines: RX conectado a D3, TX conectado a D2
 
 //
 //#define DEBUG_ESP8266 //Comentar si no se quiere imprimir la respuesta del ESP8266
-#define ESP8266_OK //Confirmar si el comando AT fue recibido
+//#define ESP8266_OK //Confirmar si el comando AT fue recibido
 
 #define SSID   "Museocr"
 #define PASS   "museocr1"
 
 String server = "AT+CIPSTART=\"TCP\",\"https://hwthoncr16.herokuapp.com\",80";  //Direccion del servidor al que se envía la solicitud
-String getl = "GET /lescorin/last HTTP/1.1\r\nHOST: hwthoncr16.herokuapp.com:80\r\n\r\n";
+String getl = "GET /centrophorus/last HTTP/1.1\r\nHOST: hwthoncr16.herokuapp.com:80\r\n\r\n";
 String trama; // Almacena el comando AT que envía el largo del dato a enviarse al servidor
 
 //-----------------------------------------------------------------------------------------------------------------
 void setup() {
 
   Serial.begin(115200);             // Inicializacion del Monitor Serial a 115200
-  mySerial.begin(115200);           // Inicializacion  puerto serial virtual
+  mySerial.begin(38400);           // Inicializacion  puerto serial virtual
   Serial.println(F("Manejo Modulo ESP8266 con Arduino UNO"));// Mensaje de inicialización
 
   //*********************Pruebas iniciales**************************
@@ -68,7 +68,8 @@ void leer() {
 }
 
 bool findOK() {                     //Función que permite verificar el resultado "OK" del comando AT
-  if (mySerial.find("OK"))         // Si se localiza OK en la respuesta del ESP8266
+  String str = mySerial.readStringUntil('\n');
+  if (str.indexOf("OK") != -1)         // Si se localiza OK en la respuesta del ESP8266
   {
     Serial.println("OK");
     return true;                    // Devuelve "True"
@@ -81,17 +82,12 @@ bool findOK() {                     //Función que permite verificar el resultad
 }
 
 void SendCmd (String ATcmd, int Tespera) {
+  mySerial.println(ATcmd);
+  delay(100); //Tiempo a esperar para abrir el puerto mySerial
 
-  while (!mySerial.find("OK")) {
-    mySerial.println(F("AT"));
-    delay(1000);
-  }
 }
 
 void loop() {
-
-  //******************Toma de datos***********************************
-  int sensorValue = analogRead(A0);
 
   //*****************Conexión con el servidor*************************
   Serial.println(getl);
@@ -101,6 +97,16 @@ void loop() {
   delay(100);
   mySerial.println(getl);
   delay(300);
-  leer();
-  resetESP();
+  delay(300);
+  String recibido = "";
+  //////////////////////////////
+  while (mySerial.available()) {
+    
+    recibido += mySerial.readStringUntil('\n');;
+    
+  }
+  Serial.println("-------------------------");
+  Serial.println(recibido);
+  Serial.println("+++++++++++++++++++++++++");
+  //resetESP();
 }
