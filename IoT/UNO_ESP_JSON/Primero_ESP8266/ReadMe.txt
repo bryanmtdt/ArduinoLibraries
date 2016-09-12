@@ -42,3 +42,23 @@ Pin 0: Transmite información ------------->>>>>>>>>>>   Pin RXD: Recibe informa
 
                                       1<-TX
 Pin 1: Recibe información    <<<<<<<<<<<<<-----------   Pin TXD: Transmite información
+
+PINOUT:
+
+RXD		VCC
+
+GPIO0		RST	
+
+GPIO2		CH_PD
+	
+GND		TXD
+
+
+
+
+
+
+
+
+
+

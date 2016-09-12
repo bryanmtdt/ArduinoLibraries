@@ -1,0 +1,149 @@
+Preguntar si está conectado o cuando se resetea si se conectó porque tiene preprogramdo conectarse a la red cuando se reinicia, lo mismo para CWMODE
+
+
+AT+CWLAP
+
++CWLAP:(4,"iMA6iNEXYZ",-51,"ac:cf:85:ff:a4:35",1,1)
++CWLAP:(3,"FMC1",-92,"2c:b0:5d:e8:7a:32",1,6)
++CWLAP:(3,"WiFisc",-89,"74:44:01:f2:d5:aa",1,-7)
++CWLAP:(4,"Apt 11",-74,"00:23:6a:ca:2a:17",11,-2)
++CWLAP:(4,"Consultur",-91,"58:6d:8f:e0:fc:ba",11,13)
++CWLAP:(4,"GERHER",-91,"84:1b:5e:a6:c9:3b",11,-9)
++CWLAP:(4,"Consultur_EXT",-74,"08:bd:43:fd:b4:96",11,11)
+
+OK
+___________________________________________
+
+AT+CWJAP="iMA6iNEXYZ","16davinci"
+
+WIFI DISCONNECT
+WIFI CONNECTED
+WIFI GOT IP
+
+OK
+___________________________________________
+
+AT+CIFSR
+
++CIFSR:STAIP,"192.168.8.109"
++CIFSR:STAMAC,"5c:cf:7f:17:4a:18"
+
+OK
+___________________________________________
+
+AT+GMR
+
+AT version:0.40.0.0(Aug  8 2015 14:45:58)
+SDK version:1.3.0
+Ai-Thinker Technology Co.,Ltd.
+Build:1.3.0.2 Sep 11 2015 11:48:04
+OK
+___________________________________________
+
+AT+CWMODE=3
+
+
+OK
+___________________________________________
+
+AT+CIPSTART="TCP","http://www.imaginexyz.com",80 -> sin http
+AT+CIPSEND=175 -> MAX data length 2048 bytes
+
+
+AT+CIPSTART="TCP","www.imaginexyz.com",80
+
+AT+CIPSEND=175
+
+POST /rentacar/pos HTTP/1.1
+Host: www.imaginexyz.com:80
+Connection: close
+Accept: application/json
+Content-Type: application/json
+Content-Length:19
+
+{"Distancia":20001}
+
+
+POST /rentacar/pos HTTP/1.1\r\nHost: www.imaginexyz.com:80\r\nConnection: close\r\nAccept: application/json\r\nContent-Type: application/json\r\nContent-Length:19\r\n\r\n{\"Distancia\":20001}
+
+
+:RESPUESTAS
+
+AT+CIPSEND=175
+
+
+OK
+> 
+busy s...
+
+Recv 175 bytes
+
+SEND OK
+
++IPD,343:HTTP/1.1 200 OK
+Server: Cowboy
+Connection: close
+X-Powered-By: Express
+Content-Type: application/json; charset=utf-8
+Content-Length: 108
+Etag: W/"6c-PNQLNXYN/uohg5MWSt/mNw"
+Date: Sat, 10 Sep 2016 18:55:33 GMT
+Via: 1.1 vegur
+
+{"Distancia":20001,"date":"2016-09-10T12:55:33.096Z","hour":12,"minute":55,"_id":"57d45725a3b32c00034a81c0"}CLOSED
+
+
+___________________________________________
+
+AT+CIPCLOSE
+___________________________________________
+
+AT+CIPSTART="TCP","www.imaginexyz.com",80
+
+AT+CIPSEND=60
+
+GET /rentacar/last HTTP/1.1
+Host: www.imaginexyz.com:80
+
+///Doble \r\n es muy importante
+
+
+GET /rentacar/last HTTP/1.1\r\nHost: www.imaginexyz.com:80\r\n\r\n
+
+
+:RESPUESTAS
+
+AT+CIPSTART="TCP","www.imaginexyz.com",80
+
+CONNECT
+
+OK
+AT+CIPSEND=60
+
+
+OK
+> 
+Recv 60 bytes
+
+SEND OK
+
++IPD,380:HTTP/1.1 200 OK
+Server: Cowboy
+Connection: keep-alive
+X-Powered-By: Express
+Access-Control-Allow-Origin: *
+Content-Type: application/json; charset=utf-8
+Content-Length: 108
+Etag: W/"6c-dXh+LJwxK4qgkCE+ZoLurg"
+Date: Sat, 10 Sep 2016 19:03:25 GMT
+Via: 1.1 vegur
+
+{"_id":"57d45725a3b32c00034a81c0","Distancia":20001,"date":"2016-09-10T12:55:33.096Z","hour":12,"minute":55}CLOSED
+
+___________________________________________
+
+___________________________________________
+
+___________________________________________
+
+___________________________________________

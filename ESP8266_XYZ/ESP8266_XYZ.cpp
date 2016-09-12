@@ -20,7 +20,7 @@ bool ESP8266_XYZ::espTest()
 
 bool ESP8266_XYZ::findOK() {
 	delay(100);
-	int t = millis();     
+	int t = millis();
 	while((millis() - t) < global_timeout){
 		if (stream->find("OK"))
 		{
@@ -32,9 +32,16 @@ bool ESP8266_XYZ::findOK() {
 
 bool ESP8266_XYZ::connectAP(const __FlashStringHelper* ssid, const __FlashStringHelper* pass){
 	//Comando AT para el modo de conexión
-	stream->println(F("AT+CWMODE=1"));
+	stream->println(F("AT+CWMODE=3"));//Modo 3 de operación: SoftAP + Station 
 	findOK();
 	//Comando AT para conectarse a una red
+
+
+	//Hay que hacer una rutina que pregunte si ya está conectado, para que no se conecte simepre que arranaca
+	//por default cuando enciende se conecta al ultimo ap configurado
+	//Si no se puede configurar también
+
+
 	#ifdef DEBUG
 	Serial.print(F("AT+CWJAP=\""));
 	Serial.print(ssid);
@@ -78,6 +85,11 @@ int ESP8266_XYZ::readResponse(String* response) {
 	    if (stream->available()) {
 
 	    	char c = stream->read();
+	    	
+
+	    	#ifdef DEBUG //Quiero ver que es lo que está llegando
+	    	Serial.print(c);
+	    	#endif
 
 		    //Luego del primer espacio se encuentra el código de estado
 		    if(c == ' ' && !in_status){
@@ -131,7 +143,7 @@ int ESP8266_XYZ::httpPost(String server, String path, int port){
 	json.setCharAt(json_len-1, '}');
 
 	#ifdef DEBUG
-	Serial.print(F("AT+CIPSTART=\"TCP\",\"http://"));
+	Serial.print(F("AT+CIPSTART=\"TCP\",\""));
 	Serial.print(server);
 	Serial.print(F("\","));
 	Serial.println(port);
@@ -231,7 +243,7 @@ int ESP8266_XYZ::httpGet(String server, String path, int port, String *response)
 	rq_len += path.length();
 
 	//Comando AT para abrir la conexión
-	stream->print(F("AT+CIPSTART=\"TCP\",\"http://"));
+	stream->print(F("AT+CIPSTART=\"TCP\",\""));
 	stream->print(server);
 	stream->print(F("\","));
 	stream->println(port);
