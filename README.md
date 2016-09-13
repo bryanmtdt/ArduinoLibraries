@@ -1,2 +1,0 @@
-# ArduinoLibraries
-Bibliotecas de Arduino
