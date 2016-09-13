@@ -1,10 +1,15 @@
 #include "ESP8266_XYZ.h"
 #define DEBUG
 
-ESP8266_XYZ::ESP8266_XYZ(Stream *s) 
-{
-	//Asigna el objeto Stream y el pin de reset del ESP8266
-	stream = s;
+void ESP8266_XYZ::readSerialContent(int ser_timeout){
+	delay(ser_timeout);
+	while(stream->available()){
+		serial_content += char(stream->read());
+		//delay(10);
+	}
+	#ifdef DEBUG
+		Serial.println(serial_content);
+	#endif
 }
 
 bool ESP8266_XYZ::espTest()
@@ -12,57 +17,73 @@ bool ESP8266_XYZ::espTest()
 	//Comando AT de prueba
 	stream->println(F("AT"));
 	
-	#ifdef DEBUG
-		Serial.println(F("AT"));
-	#endif
-	return findOK();
+	return find_serial(100, "OK");
 }
 
-bool ESP8266_XYZ::findOK() {
-	delay(100);
-	int t = millis();
-	while((millis() - t) < global_timeout){
-		if (stream->find("OK"))
-		{
-		   	return true; 
-		}
+bool ESP8266_XYZ::find_serial(int ser_timeout, String str) {
+	readSerialContent(ser_timeout);
+	if (serial_content.indexOf(str) != -1)
+	{	
+		serial_content = "";
+	   	return true; 
 	}
 	return false;               
+}
+
+bool ESP8266_XYZ::serial_line(int i, String str) {
+	delay(200);
+	int k = 0;
+	while(k < i ){
+		String line = stream->readStringUntil('\n'); 
+		if (line.indexOf(str) != -1){	
+			Serial.println(line);
+	   		return true; 
+		}
+		delay(50);
+		k++;
+	}
+	return false;
 }
 
 bool ESP8266_XYZ::connectAP(const __FlashStringHelper* ssid, const __FlashStringHelper* pass){
 	//Comando AT para el modo de conexión
 	stream->println(F("AT+CWMODE=3"));//Modo 3 de operación: SoftAP + Station 
-	findOK();
+	find_serial(100, "OK");
 	//Comando AT para conectarse a una red
 
 
 	//Hay que hacer una rutina que pregunte si ya está conectado, para que no se conecte simepre que arranaca
 	//por default cuando enciende se conecta al ultimo ap configurado
-	//Si no se puede configurar también
+	//Si no se puede configurar también (AT+CIFSR)
 
-
-	#ifdef DEBUG
-	Serial.print(F("AT+CWJAP=\""));
-	Serial.print(ssid);
-	Serial.print(F("\",\""));
-	Serial.print(pass);
-	Serial.println(F("\""));
-	#endif
+	stream->println(F("AT+CWQAP"));
+	readSerialContent(100);
 	stream->print(F("AT+CWJAP=\""));
 	stream->print(ssid);
 	stream->print(F("\",\""));
 	stream->print(pass);
 	stream->println(F("\""));
-	delay(1500);
-	return findOK();
+
+	//readSerialContent();
+	return find_serial(7000, "GOT IP");
 }
 
-bool ESP8266_XYZ::systemReset(){
+bool ESP8266_XYZ::softReset(){
 	//Comando AT para reiniciar el sistema
 	stream->println(F("AT+RST"));
 
-	return findOK();
+	return find_serial(100, "OK");
+}
+
+bool ESP8266_XYZ::hardReset() {
+	pinMode(rst, OUTPUT); 
+  	if(rst < 0) {
+  		return false;
+  	}
+	digitalWrite(rst, LOW);
+	delay(10);                  // Hold a moment
+	digitalWrite(rst, HIGH);
+	return find_serial(100, "OK");    // Purge boot message from stream
 }
 
 int ESP8266_XYZ::readResponse(String* response) {
@@ -86,10 +107,6 @@ int ESP8266_XYZ::readResponse(String* response) {
 
 	    	char c = stream->read();
 	    	
-
-	    	#ifdef DEBUG //Quiero ver que es lo que está llegando
-	    	Serial.print(c);
-	    	#endif
 
 		    //Luego del primer espacio se encuentra el código de estado
 		    if(c == ' ' && !in_status){
@@ -125,29 +142,21 @@ int ESP8266_XYZ::readResponse(String* response) {
 		    }
 	    }
 	}
+	response->remove(0,response->indexOf('{'));
+	response->remove(response->indexOf('}')+1);
 
-  return code;
+	#ifdef DEBUG 
+	    	Serial.println(*response);
+	#endif
+  	return code;
 }
 
 
-int ESP8266_XYZ::httpPost(String server, String path, int port){
 
-	//Cálculo de lengitud total del mensaje
-	uint16_t json_len = json.length();
-	uint16_t rq_len = 123;		//Longitud fija de la solicitud
-	rq_len += server.length();
-	rq_len += path.length();
-	rq_len += json_len;
-	rq_len += String(json_len).length();
+bool ESP8266_XYZ::connectServer(String server, int port){
 
-	json.setCharAt(json_len-1, '}');
-
-	#ifdef DEBUG
-	Serial.print(F("AT+CIPSTART=\"TCP\",\""));
-	Serial.print(server);
-	Serial.print(F("\","));
-	Serial.println(port);
-	#endif
+	//stream->println(F("AT+CIFSR"));
+	//readSerialContent(150);
 
 	//Comando AT para abrir la conexión
 	stream->print(F("AT+CIPSTART=\"TCP\",\""));
@@ -155,45 +164,46 @@ int ESP8266_XYZ::httpPost(String server, String path, int port){
 	stream->print(F("\","));
 	stream->println(port);
 
-	delay(300);
 
-	//Serial.println(stream->readStringUntil('\n'));
+	return find_serial(5000, "OK");
+	//return findOK(7000);
+}
 
-	if(findOK()){
+
+int ESP8266_XYZ::httpPost(String server, String path, int port){
+
+
+	if(connectServer(server, port)){
 		Serial.println("Connected to server");
 
 	} else {
 		Serial.println("Connection Failure");
+		return -1;
 	}
-
-	//Comando AT para comunicarse con el servidor
-	#ifdef DEBUG
-	Serial.print(F("AT+CIPSEND="));
-	Serial.println(rq_len);
-	#endif
-
-	stream->print(F("AT+CIPSEND="));
-	stream->println(rq_len);
 
 	server += ":";
 	server += String(port);
-	delay(100);
-	stream->find(">");
-	delay(300);
+
+	//Cálculo de lengitud total del mensaje
+	uint16_t json_len = json.length();
+	uint16_t rq_len = 120;		//Longitud fija de la solicitud
+	rq_len += server.length();
+	rq_len += path.length();
+	rq_len += json_len;
+	rq_len += String(json_len).length();
+	rq_len += String(json_len).length();
+
+	json.setCharAt(json_len-1, '}');
+
+	delay(250);
+	stream->print(F("AT+CIPSEND="));
+	stream->println(rq_len);
+	find_serial(300, ">");
+
+//POST  HTTP/1.1\r\nHost: \r\nConnection: close\r\nAccept: application/json\r\nContent-Type: application/json\r\nContent-Length:\r\n\r\n
 
 	//Solicitud HTTP al servidor
 	//Header
-	#ifdef DEBUG
-	Serial.print(F("POST "));
-	Serial.print(path);
-	Serial.print(F(" HTTP/1.1\r\nHost: "));
-	Serial.print(server);
-	Serial.print(F("\r\nConnection: close\r\n"));
-	Serial.print(F("Accept: application/json\r\n"));
-	Serial.print(F("Content-Type: application/json\r\nContent-Length:"));
-	Serial.print(json_len);
-	Serial.println(F("\r\n"));
-	#endif
 	stream->print(F("POST "));
 	stream->print(path);
 	stream->print(F(" HTTP/1.1\r\nHost: "));
@@ -204,59 +214,51 @@ int ESP8266_XYZ::httpPost(String server, String path, int port){
 	stream->print(json_len);
 	stream->print(F("\r\n\r\n"));
 
-	//Body
-	#ifdef DEBUG
-	Serial.println(json);
-	#endif
-
 	stream->println(json);
-	//stream->print(F("\r\n\r\n"));
-
-	delay(1000);
-
-	String resp;
-
-	//Se obtiene el código de estado de la solicitud
-	int statusCode = readResponse(&resp);
-
-
-
+	
 	//Comando AT para cerrar la conexión
-	#ifdef DEBUG
-	Serial.print("Srv: ");
-	Serial.println(resp);
-	//Serial.println(F("AT+CIPCLOSE"));
-	#endif
 	//stream->println(F("AT+CIPCLOSE"));
 
 	//Reestablece el JSON para el siguiente POST
 	json = "{";
 
-	return statusCode;
+	//Se obtiene el código de estado de la solicitud
+
+	String resp = "";
+	if(serial_line(10, "SEND OK")){
+		return readResponse(&resp);
+	} else {
+		return -1;
+	}
+
 }
 
 int ESP8266_XYZ::httpGet(String server, String path, int port, String *response){
+
+	stream->println(F("AT+CIPCLOSE"));
+	readSerialContent(100);
+	if(connectServer(server, port)){
+		Serial.println("Connected to server");
+
+	} else {
+		Serial.println("Connection Failure");
+	}
+
+	server += ":";
+	server += String(port);
 
 	//Cálculo de lengitud total del mensaje
 	uint16_t rq_len = 25;		//Longitud fija de la solicitud
 	rq_len += server.length();
 	rq_len += path.length();
-
-	//Comando AT para abrir la conexión
-	stream->print(F("AT+CIPSTART=\"TCP\",\""));
-	stream->print(server);
-	stream->print(F("\","));
-	stream->println(port);
-
+	delay(250);
+	
 	//Comando AT para comunicarse con el servidor
 	stream->print(F("AT+CIPSEND="));
 	stream->println(rq_len);
+	find_serial(300, ">");
 
-	server += ":";
-	server += String(port);
-
-	delay(100);
-
+	//GET  HTTP/1.1\r\nHost: \r\n\r\n
 	//Solicitud HTTP al servidor
 	//Header
     stream->print(F("GET "));
@@ -267,13 +269,15 @@ int ESP8266_XYZ::httpGet(String server, String path, int port, String *response)
 
 	delay(100);
 
-	//Se obtiene el código de estado de la solicitud
-	int statusCode = readResponse(response);
-
 	//Comando AT para cerrar la conexión
 	//stream->println(F("AT+CIPCLOSE"));
 
-	return statusCode;
+	//Se obtiene el código de estado de la solicitud
+	if(serial_line(10, "SEND OK")){
+		return readResponse(response);
+	} else {
+		return -1;
+	}
 }
 
 void ESP8266_XYZ::setTimeout(uint32_t timeout){
@@ -302,6 +306,14 @@ void ESP8266_XYZ::addToJson(String id, int value){
 
 void ESP8266_XYZ::addToJson(String id, float value){
 	addToJsonAux(id, String(value));
+}
+
+ESP8266_XYZ::ESP8266_XYZ(Stream *s, int rst_pin) 
+{
+	//Asigna el objeto Stream y el pin de reset del ESP8266
+	stream = s;
+	rst = rst_pin;
+	//hardReset();
 }
 
 /*bool ESP8266_XYZ::getJsonAttribute(String attribute, String* value) {
