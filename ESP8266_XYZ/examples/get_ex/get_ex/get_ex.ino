@@ -35,12 +35,20 @@ void loop() {
   //Se agrega el contador m al JSON con nombre "ContadorM"
   esp.addToJson("ContadorM", m);
 
-  //Se envía la solicitud POST al servidor 
-  int resp = esp.httpPost("www.imaginexyz.com", "/rentacar/pos", 80);
+  //Se crea un objeto String cuyo puntero será pasado como argumento 
+  String str_resp;
+
+  //Se envía la solicitud GET al servidor 
+  int resp = esp.httpGet("www.imaginexyz.com", "/rentacar/last", 80, &str_resp);
   
   //Se imprime el código de respuesta del servidor
   Serial.print("Respuesta: ");
   Serial.println(resp);
+  Serial.println();
+
+  //Se imprime el cuerpo de la respuesta del servidor
+  Serial.print("JSON: ");
+  Serial.println(str_resp);
   Serial.println();
 
   //Se incrementa contador de ejemplo 
