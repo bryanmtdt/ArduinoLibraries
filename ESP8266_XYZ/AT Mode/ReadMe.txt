@@ -5,7 +5,7 @@ Para configurar los baudios de manera correcta, realizar los siguientes pasos:
 
 1. Conectar el ESP8266 y Arduino UNO como lo muestra el diagrama en "Primero_ESP8266"
 2. Cargar el ejemplo "Blink" al Arduino UNO.
-3. Abrir monitor serial en 38400 baudios CON LA CONFIGURACIÓN DE "Both NL & CR" y digitar "AT" en la barra de envío.
+3. Abrir monitor serial en 9600 baudios CON LA CONFIGURACIÓN DE "Both NL & CR" y digitar "AT" en la barra de envío.
 4. Comprobar que el ESP8266, responda "OK", debería verse así:
 
 AT
@@ -24,7 +24,7 @@ Caso contrario cambiar los baudios en el monitor serial y digitar "AT" hasta enc
 - 74880
 - 115200
 
-6. Si responda "OK", digitar el siguiente comando: "AT+UART=38400,8,1,0,0"
+6. Si responda "OK", digitar el siguiente comando: "AT+UART=9600,8,1,0,0"
 7. Cambiar nuevamente los baudios a 38400 y comprobar que el cambio fue correcto digitando nuevamente "OK":
 
 AT
@@ -35,7 +35,7 @@ NOTA: Cada vez que que envía un comando al ESP8266 o recibe un comando del ESP8
 
 Puede ser confuso la interconexión entre pines del puerto UART, se debe entender así:
 
-_________________________								______________________________
+______________________________								______________________________
 UNO 													ESP8266
                                       0->RX
 Pin 0: Transmite información ------------->>>>>>>>>>>   Pin RXD: Recibe información
@@ -43,6 +43,8 @@ Pin 0: Transmite información ------------->>>>>>>>>>>   Pin RXD: Recibe informa
                                       1<-TX
 Pin 1: Recibe información    <<<<<<<<<<<<<-----------   Pin TXD: Transmite información
 
+
+_____________________________________________________
 PINOUT:
 
 RXD		VCC
