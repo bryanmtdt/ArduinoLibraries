@@ -114,7 +114,7 @@ int ESP8266_XYZ::readResponse(String* response) {
 		    }
 
 		    //Se lee el código de estado de 3 dígitos
-		    if(in_status && i < 3 && c != ' '){
+		    if(in_status && i < 3 && c != ' '){////Qué pasa si el código es de 4 digitos
 		        status_code[i] = c;
 		        i++;
 		    }
@@ -171,7 +171,11 @@ bool ESP8266_XYZ::connectServer(String server, int port){
 
 
 int ESP8266_XYZ::httpPost(String server, String path, int port){
+	
 
+	stream->println(F("AT+CIPCLOSE"));
+	readSerialContent(100);
+	
 
 	if(connectServer(server, port)){
 		Serial.println("Connected to server");
@@ -267,7 +271,7 @@ int ESP8266_XYZ::httpGet(String server, String path, int port, String *response)
    	stream->print(server);
 	stream->print(F("\r\n\r\n"));
 
-	delay(100);
+	//delay(100);
 
 	//Comando AT para cerrar la conexión
 	//stream->println(F("AT+CIPCLOSE"));
