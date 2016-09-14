@@ -67,6 +67,12 @@ void loop() {
   //Se imprime el cuerpo de la respuesta del servidor
   Serial.print("JSON: ");
   Serial.println(str_resp);
+  
+  //Extrae el valor del atributo buscado
+  String valor;
+  esp.getJsonAttribute(str_resp, "_id", &valor);//(JSON completo, atributo buscado, valor)
+  Serial.println(valor);
+
 
   delay(1000);         //Suspende operaciones por 1 segundo
 }

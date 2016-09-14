@@ -1,5 +1,5 @@
 #include "ESP8266_XYZ.h"
-#define DEBUG
+//#define DEBUG
 
 void ESP8266_XYZ::readSerialContent(int ser_timeout){
 	delay(ser_timeout);
@@ -30,13 +30,15 @@ bool ESP8266_XYZ::find_serial(int ser_timeout, String str) {
 	return false;               
 }
 
-bool ESP8266_XYZ::serial_line(int i, String str) {
+bool ESP8266_XYZ::serial_line(int i, String str) {///todo esto depende del baudrate 
 	delay(200);
 	int k = 0;
 	while(k < i ){
 		String line = stream->readStringUntil('\n'); 
-		if (line.indexOf(str) != -1){	
-			Serial.println(line);
+		if (line.indexOf(str) != -1){
+			#ifdef DEBUG 	
+				Serial.println(line);
+			#endif
 	   		return true; 
 		}
 		delay(50);
@@ -114,7 +116,7 @@ int ESP8266_XYZ::readResponse(String* response) {
 		    }
 
 		    //Se lee el código de estado de 3 dígitos
-		    if(in_status && i < 3 && c != ' '){////Qué pasa si el código es de 4 digitos
+		    if(in_status && i < 3 && c != ' '){////Qué pasa si el código es de 4 digitos???
 		        status_code[i] = c;
 		        i++;
 		    }
@@ -178,10 +180,14 @@ int ESP8266_XYZ::httpPost(String server, String path, int port){
 	
 
 	if(connectServer(server, port)){
-		Serial.println("Connected to server");
+		#ifdef DEBUG 
+			Serial.println("Connected to server");
+		#endif
 
 	} else {
-		Serial.println("Connection Failure");
+		#ifdef DEBUG 
+			Serial.println("Connection Failure");
+		#endif
 		return -1;
 	}
 
@@ -195,7 +201,7 @@ int ESP8266_XYZ::httpPost(String server, String path, int port){
 	rq_len += path.length();
 	rq_len += json_len;
 	rq_len += String(json_len).length();
-	rq_len += String(json_len).length();
+	rq_len += String(json_len).length();//Duplicado???
 
 	json.setCharAt(json_len-1, '}');
 
@@ -242,10 +248,14 @@ int ESP8266_XYZ::httpGet(String server, String path, int port, String *response)
 	stream->println(F("AT+CIPCLOSE"));
 	readSerialContent(100);
 	if(connectServer(server, port)){
-		Serial.println("Connected to server");
+		#ifdef DEBUG 
+			Serial.println("Connected to server");
+		#endif
 
 	} else {
-		Serial.println("Connection Failure");
+		#ifdef DEBUG
+			Serial.println("Connection Failure");
+		#endif
 	}
 
 	server += ":";
@@ -318,6 +328,19 @@ ESP8266_XYZ::ESP8266_XYZ(Stream *s, int rst_pin)
 	stream = s;
 	rst = rst_pin;
 	//hardReset();
+}
+
+
+bool ESP8266_XYZ::getJsonAttribute(String Input, String Attribute, String *value) {
+
+	int start = Input.indexOf(":",Input.indexOf(Attribute));
+	int end = Input.indexOf(",",start);
+	int end2 = Input.indexOf("}",start);
+	if (end == -1){end = end2;}
+	for (int n = start+1; n<end; n++) {
+		value -> concat(Input[n]);
+	}
+	return value;               
 }
 
 /*bool ESP8266_XYZ::getJsonAttribute(String attribute, String* value) {
