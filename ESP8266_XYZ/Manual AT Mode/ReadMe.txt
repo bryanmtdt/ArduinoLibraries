@@ -16,8 +16,6 @@ OK
 
 Caso contrario cambiar los baudios en el monitor serial y digitar "AT" hasta encontrar "OK". El orden puede ser el siguiente:
 
-
-- 9600
 - 19200
 - 38400
 - 57600
@@ -25,13 +23,13 @@ Caso contrario cambiar los baudios en el monitor serial y digitar "AT" hasta enc
 - 115200
 
 6. Si responda "OK", digitar el siguiente comando: "AT+UART=9600,8,1,0,0"
-7. Cambiar nuevamente los baudios a 38400 y comprobar que el cambio fue correcto digitando nuevamente "OK":
+7. Cambiar nuevamente los baudios a 9600 y comprobar que el cambio fue correcto digitando nuevamente "AT":
 
 AT
 
 OK
 
-NOTA: Cada vez que que envía un comando al ESP8266 o recibe un comando del ESP8266, se debe encender un LED (típicamente azul) en el shield del ESP8266. Si esto no sucede revisar las conexiones entre los pines 0 y 1 del Arduino UNO y las conexiones de RX y TX del ESP8266.
+NOTA: Cada vez que envía un comando al ESP8266 o recibe un comando del ESP8266, se debe encender un LED (típicamente azul) en el shield del ESP8266. Si esto no sucede revisar las conexiones entre los pines 0 y 1 del Arduino UNO y las conexiones de RX y TX del ESP8266.
 
 Puede ser confuso la interconexión entre pines del puerto UART, se debe entender así:
 
