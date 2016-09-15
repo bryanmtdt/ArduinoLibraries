@@ -1,0 +1,3 @@
+Cosas que hay que hacer:
+Diagrama de Conexión: Check
+Hacer un ReadMe con los pasos de: Firmware, Manual y Biblioteca

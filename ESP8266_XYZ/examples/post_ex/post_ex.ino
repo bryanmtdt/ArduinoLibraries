@@ -4,6 +4,8 @@
 
 #define SSID F("iMA6iNEXYZ")  //Nombre de la red a la que se desea conectar
 #define PASS F("16davinci")   //Contraseña de la red
+#define server F("www.imaginexyz.com")  //Servidor
+#define PostPath F("/rentacar/pos")     //Ruta del Post
 #define ESP_RX   3            //Pin de RX del ESP
 #define ESP_TX   2            //Pin de TX del ESP
 
@@ -36,7 +38,7 @@ void loop() {
   esp.addToJson("ContadorM", m);
 
   //Se envía la solicitud POST al servidor 
-  int resp = esp.httpPost("www.imaginexyz.com", "/rentacar/pos", 80);
+  int resp = esp.httpPost(server, PostPath, 80);
   
   //Se imprime el código de respuesta del servidor
   Serial.print("Respuesta: ");
@@ -48,5 +50,5 @@ void loop() {
   //Se decrementa el contador de ejemplo
   m--;
   
-  delay(15000);         //Suspende operaciones por 15 segundos
+  delay(1000);         //Suspende operaciones por 1 segundos
 }

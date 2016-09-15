@@ -4,6 +4,8 @@
 
 #define SSID F("iMA6iNEXYZ")  //Nombre de la red a la que se desea conectar
 #define PASS F("16davinci")   //Contraseña de la red
+#define server F("www.imaginexyz.com")  //Servidor
+#define GetPath F("/rentacar/last")     //Ruta del Get
 #define ESP_RX   3            //Pin de RX del ESP
 #define ESP_TX   2            //Pin de TX del ESP
 
@@ -31,7 +33,7 @@ void loop() {
   String str_resp;
 
   //Se envía la solicitud GET al servidor
-  int resp = esp.httpGet("www.imaginexyz.com", "/rentacar/last", 80, &str_resp);
+  int resp = esp.httpGet(server, GetPath, 80, &str_resp);
 
   //Se imprime el código de respuesta del servidor
   Serial.print("Respuesta: ");
@@ -41,7 +43,11 @@ void loop() {
   //Se imprime el cuerpo de la respuesta del servidor
   Serial.print("JSON: ");
   Serial.println(str_resp);
-  Serial.println();
+
+  //Extrae el valor del atributo buscado
+  String valor;
+  esp.getJsonAttribute(str_resp, "_id", &valor);//(JSON completo, atributo buscado, valor)
+  Serial.println(valor);
 
   delay(1000);         //Suspende operaciones por 1 segundo
 }
