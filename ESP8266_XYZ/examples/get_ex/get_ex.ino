@@ -6,10 +6,10 @@
 #define PASS F("16davinci")   //Contraseña de la red
 #define server F("www.imaginexyz.com")  //Servidor
 #define GetPath F("/rentacar/last")     //Ruta del Get
-#define ESP_RX   3            //Pin de RX del ESP
-#define ESP_TX   2            //Pin de TX del ESP
+#define ESP_TX   3            //Pin de TX del ESP
+#define ESP_RX   2            //Pin de RX del ESP
 
-SoftwareSerial swSerial(ESP_RX, ESP_TX); //Pines del ESP: RXD a D3, TXD a D2;
+SoftwareSerial swSerial(ESP_TX, ESP_RX); //Pines del ESP: TXD a D3, RXD a D2; (3,2)
 
 ESP8266_XYZ esp(&swSerial, 4);    //Arg #1: puntero al stream, Arg #2: pin para reset
 
