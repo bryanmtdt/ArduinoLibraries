@@ -1,14 +1,19 @@
 #include <ESP8266_XYZ.h>
 #include <ESP8266WiFi.h>
-//#define DEBUG
+#define DEBUG
 
-const char* SSID = "IoT-XYZ";  //Nombre de la red a la que se desea conectar
-const char* PASS = "imagineRocks";   //Contraseña de la red
-const char* server = "192.168.1.101";  //Servidor
+//const char* SSID = "IoT-XYZ";  //Nombre de la red a la que se desea conectar
+//const char* PASS = "imagineRocks";   //Contraseña de la red
+//const char* server = "192.168.1.101";  //Servidor
+const char* SSID = "Consultur_EXT";  //Nombre de la red a la que se desea conectar
+const char* PASS = "turismo07";   //Contraseña de la red
+const char* server = "https://iot-xyz.herokuapp.com";  //Servidor
 
-#define server2  F("192.168.1.101") // Servidor
-#define PostPath F("/temp/")     //Ruta del Post 
-#define GetPath F("/temp/")     //Ruta del Get
+//https://iot-xyz.herokuapp.com/all
+
+#define server2  F("https://iot-xyz.herokuapp.com") // Servidor
+#define PostPath F("/sensor/")     //Ruta del Post 
+#define GetPath F("/sensor/")     //Ruta del Get
 
 const int httpPort = 3000;
 String response;

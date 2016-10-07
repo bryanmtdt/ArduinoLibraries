@@ -1,14 +1,18 @@
 #include <ESP8266_XYZ.h>
 #include <ESP8266WiFi.h>
-//#define DEBUG
+#define DEBUG
 
-const char* SSID = "IoT-XYZ";  //Nombre de la red a la que se desea conectar
-const char* PASS = "imagineRocks";   //Contraseña de la red
-const char* server = "192.168.1.101";  //Servidor
+//const char* SSID = "iMA6iNEXYZ";  //Nombre de la red a la que se desea conectar
+//const char* PASS = "16davinci";   //Contraseña de la red
+const char* SSID = "Consultur_EXT";  //Nombre de la red a la que se desea conectar
+const char* PASS = "turismo07";   //Contraseña de la red
+const char* server = "https://iot-xyz.herokuapp.com";  //Servidor
 
-#define server2  F("192.168.1.101") // Servidor
-#define PostPath F("/ultra/")     //Ruta del Post 
-#define GetPath F("/ultra/")     //Ruta del Get
+//https://iot-xyz.herokuapp.com/all
+
+#define server2  F("https://iot-xyz.herokuapp.com") // Servidor
+#define PostPath F("/sensor/")     //Ruta del Post 
+#define GetPath F("/sensor/")     //Ruta del Get
 
 const int httpPort = 3000;
 String response;
@@ -91,6 +95,7 @@ void setup() {
 
 #ifdef DEBUG
   Serial.begin(115200);
+  Serial.println("Connecting ");
 #endif
 
   WiFi.begin(SSID, PASS);
@@ -98,7 +103,7 @@ void setup() {
     delay(500);
 
 #ifdef DEBUG
-    Serial.print(".");
+    Serial.print("-");
 #endif
 
   }
@@ -140,9 +145,9 @@ void buzz(int targetPin, long frequency, long length) {
   //// get the total number of cycles to produce
   for (long i = 0; i < numCycles; i++) { // for the calculated length of time...
     digitalWrite(targetPin, HIGH); // write the buzzer pin high to push out the diaphram
-    delayMicroseconds(delayValue); // wait for the calculated delay value
+    //delayMicroseconds(delayValue); // wait for the calculated delay value
     digitalWrite(targetPin, LOW); // write the buzzer pin low to pull back the diaphram
-    delayMicroseconds(delayValue); // wait again or the calculated delay value
+    //delayMicroseconds(delayValue); // wait again or the calculated delay value
   }
   digitalWrite(5, LOW);
 }
