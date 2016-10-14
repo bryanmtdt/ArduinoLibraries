@@ -2,26 +2,29 @@
 #define ESP8266_XYZ_H
 
 #include <Arduino.h>
+#include <ESP8266WiFi.h>
 //#include <string>
 
 class ESP8266_XYZ 
 {
 	public:
-		ESP8266_XYZ(Stream *s = &Serial, int rst = -1);
-		
-		int httpPostDirect(String server, String path, int port, String *response);
-		
+		bool connectAP(const char* ssid, const char* pass);
+		void softReset();
+		int readResponse(String* response);
+		int httpPost(const char* server, String path, int port, String *response);
+		int httpGet(const char* server, String path, int port, String *response);
+		bool getJsonAttribute(String Input, String Attribute, String *value);
+		void addToJson(String id, String value);
+		void addToJson(String id, int value);
+		void addToJson(String id, float value);
+		void setTimeout(uint32_t timeout);
 		
 	private:
-		void readSerialContent(int ser_timeout);
-		bool connectServer(String server, int port);
+		bool connectServer(const char* server, int port);
 		void addToJsonAux(String id, String value);
-		int rst;
+		WiFiClient client;
 		String json = "{";
-		String serial_content = "";
-		Stream *stream;
 		int global_timeout = 5000;
-
 };
 
 #endif

@@ -1,6 +1,8 @@
 #include "ESP8266_XYZ.h"
 //define DEBUG
 
+
+
 void ESP8266_XYZ::readSerialContent(int ser_timeout){
 	delay(ser_timeout);
 	while(stream->available()){
@@ -83,9 +85,9 @@ bool ESP8266_XYZ::hardReset() {
   		return false;
   	}
 	digitalWrite(rst, LOW);
-	delay(10);                  // Hold a moment
+	delay(10);                 
 	digitalWrite(rst, HIGH);
-	return find_serial(100, "OK");    // Purge boot message from stream
+	return find_serial(100, "OK");   
 }
 
 int ESP8266_XYZ::readResponse(String* response) {
@@ -172,7 +174,7 @@ bool ESP8266_XYZ::connectServer(String server, int port){
 }
 
 
-int ESP8266_XYZ::httpPost(String server, String path, int port){
+int ESP8266_XYZ::httpPost(String server, String path, int port, String *response){
 	
 
 	stream->println(F("AT+CIPCLOSE"));
@@ -201,7 +203,6 @@ int ESP8266_XYZ::httpPost(String server, String path, int port){
 	rq_len += path.length();
 	rq_len += json_len;
 	rq_len += String(json_len).length();
-	rq_len += String(json_len).length();//Duplicado???
 
 	json.setCharAt(json_len-1, '}');
 
@@ -234,9 +235,8 @@ int ESP8266_XYZ::httpPost(String server, String path, int port){
 
 	//Se obtiene el código de estado de la solicitud
 
-	String resp = "";
 	if(serial_line(10, "SEND OK")){
-		return readResponse(&resp);
+		return readResponse(response);
 	} else {
 		return -1;
 	}
@@ -280,8 +280,6 @@ int ESP8266_XYZ::httpGet(String server, String path, int port, String *response)
     stream->print(F(" HTTP/1.1\r\nHost: "));
    	stream->print(server);
 	stream->print(F("\r\n\r\n"));
-
-	//delay(100);
 
 	//Comando AT para cerrar la conexión
 	//stream->println(F("AT+CIPCLOSE"));
@@ -342,56 +340,3 @@ bool ESP8266_XYZ::getJsonAttribute(String Input, String Attribute, String *value
 	}
 	return value;               
 }
-
-/*bool ESP8266_XYZ::getJsonAttribute(String attribute, String* value) {
-
-	//Banderas de control del parseo
-	bool found_attribute = false;
-	bool in_value = false;
-	bool in_attribute = false;
-
-	//Variables de soporte
-	String att_buffer = "";
-	String val_buffer = "";
-	int code = 0;
-	uint32_t t = millis();
-
-	//Se lee caracter por caracter de acuerdo con las distintas partes
-	//de un response HTTP
-	for(int i = 0; i < ; i++) {
-
-
-    	char c = 
-
-	    //Luego de comillas se encuentra un nombre de atributo
-	    if(c == '\"'){
-	    	in_attribute = !in_attribute;
-	    }
-
-	    //Se concatena al buffer de atributo 
-	    if(c != '\"' && in_attribute){
-	    	att_buffer += c;
-	    }
-
-	 	if(c == ':'){
-	    	in_value = true;
-	    }
-
-	    //Se concatena al buffer de atributo 
-	    if(c != ':' && c != ',' && in_value){
-	    	val_buffer += c;
-	    }
-
-	    if(c == ','){
-	    	in_value = false;
-	    	if(attribute.compare(att_buffer) == 0){
-	    		value->assign(val_buffer);
-	    	} else {
-	    		val_buffer = "";
-	    		att_buffer = "";
-	    	}
-	    }
-	}
-
-  return code;
-}*/

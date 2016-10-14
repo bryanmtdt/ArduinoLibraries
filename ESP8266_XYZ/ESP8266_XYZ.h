@@ -15,7 +15,7 @@ class ESP8266_XYZ
 		bool softReset();
 		bool hardReset();
 		int readResponse(String* response);
-		int httpPost(String server, String path, int port);
+		int httpPost(String server, String path, int port, String *response);
 		int httpGet(String server, String path, int port, String *response);
 		bool getJsonAttribute(String Input, String Attribute, String *value);
 		void addToJson(String id, String value);
