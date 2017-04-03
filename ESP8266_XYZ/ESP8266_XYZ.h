@@ -22,6 +22,8 @@ class ESP8266_XYZ
 		void addToJson(String id, int value);
 		void addToJson(String id, float value);
 		void setTimeout(uint32_t timeout);
+		void print(String msg);
+		void println(String msg);
 		
 	private:
 		void readSerialContent(int ser_timeout);

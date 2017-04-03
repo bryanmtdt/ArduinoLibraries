@@ -32,6 +32,30 @@ bool ESP8266_XYZ::find_serial(int ser_timeout, String str) {
 	return false;               
 }
 
+void ESP8266_XYZ::println(String msg){
+	msg += '\n';
+	print(msg);
+}
+
+void ESP8266_XYZ::print(String msg){
+	if(connectServer("192.168.137.1",6660)){
+		#ifdef DEBUG 
+			Serial.println("Connected to server");
+		#endif
+
+	} else {
+		#ifdef DEBUG
+			Serial.println("Connection Failure");
+		#endif
+	}
+	msg += char(0x04);
+	stream->print(F("AT+CIPSEND="));
+	stream->println(msg.length());
+	find_serial(300, ">");
+	stream->println(msg);
+	stream->println(F("AT"));
+}
+
 bool ESP8266_XYZ::serial_line(int i, String str) {///todo esto depende del baudrate 
 	delay(200);
 	int k = 0;
