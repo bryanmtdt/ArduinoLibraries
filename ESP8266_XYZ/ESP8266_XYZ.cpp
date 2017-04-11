@@ -48,7 +48,6 @@ void ESP8266_XYZ::print(String msg){
 			Serial.println("Connection Failure");
 		#endif
 	}
-	msg += char(0x04);
 	stream->print(F("AT+CIPSEND="));
 	stream->println(msg.length());
 	find_serial(300, ">");
