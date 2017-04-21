@@ -3,11 +3,15 @@
 
 #include <Arduino.h>
 #include <ESP8266WiFi.h>
+#include <PubSubClient.h>
+
+#include <functional>
 //#include <string>
 
 class ESP8266_XYZ 
 {
 	public:
+		ESP8266_XYZ();
 		bool connectAP(const char* ssid, const char* pass);
 		void softReset();
 		int readResponse(String* response);
@@ -18,13 +22,29 @@ class ESP8266_XYZ
 		void addToJson(String id, int value);
 		void addToJson(String id, float value);
 		void setTimeout(uint32_t timeout);
-		
+		void MQTTTSetServer(String server, int port);
+		void MQTTTSetServer(String server, int port, String user, String pass);
+		void MQTTConfig(String id, int retries, int delay_ms);
+		void MQTTSetCallback(std::function<void(char*, uint8_t*, unsigned int)> callback);
+		bool MQTTPublish(const char* topic);
+		bool MQTTPublish(const char* topic, boolean retained);
+		bool MQTTSubscribe(const char* topic);
+		void MQTTLoop();
+		bool MQTTConnected();
+		bool MQTTReconnect(const char* id, int retries, int delay_ms);
 	private:
 		bool connectServer(const char* server, int port);
 		void addToJsonAux(String id, String value);
-		WiFiClient client;
 		String json = "{";
-		int global_timeout = 5000;
+		uint global_timeout = 5000;
+		String mqtt_id="";
+		int mqtt_retries=1, mqtt_delay_ms=100;
+		WiFiClient clientESP;
+		PubSubClient clientMQTT;
+		String mqtt_server="";
+		String mqtt_user="";
+		String mqtt_pass="";
+		int mqtt_port=1883;
 };
 
 #endif

@@ -2,8 +2,8 @@
 
 #define DEBUG
 
-const char* SSID = "iMA6iNEXYZ";  //Nombre de la red a la que se desea conectar
-const char* PASS = "16davinci";  //Contraseña de la red
+const char* SSID = "IoT-XYZ";  //Nombre de la red a la que se desea conectar
+const char* PASS = "imagineRocks";  //Contraseña de la red
 //const char* SSID = "Consultur_EXT";  //Nombre de la red a la que se desea conectar
 //const char* PASS = "turismo07";   //Contraseña de la red
 const char* server = "iot-xyz.herokuapp.com";  //Servidor

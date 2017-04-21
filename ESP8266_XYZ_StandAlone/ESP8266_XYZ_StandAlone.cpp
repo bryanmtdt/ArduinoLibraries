@@ -1,17 +1,123 @@
 #include "ESP8266_XYZ_StandAlone.h"
 //#define DEBUG
 
+ESP8266_XYZ::ESP8266_XYZ(void){
+	clientESP=WiFiClient();
+	clientMQTT=PubSubClient(clientESP);
+}
+
 bool ESP8266_XYZ::connectAP(const char* ssid, const char* pass){
 	uint32_t t = millis();
+
 	WiFi.begin(ssid, pass);
+
   	while (WiFi.status() != WL_CONNECTED && (millis() - t) < global_timeout) {
     	delay(100);
   	}
+#ifdef DEBUG
+  	Serial.println(WiFi.localIP());
+  	Serial.println(WiFi.status());
+  	Serial.println(WiFi.SSID());
+  	Serial.println(WiFi.gatewayIP());
+#endif
   	return WiFi.status(); 
 }
 
 void ESP8266_XYZ::softReset(){
 	ESP.restart();
+}
+
+void ESP8266_XYZ::MQTTTSetServer(String server, int port){
+	this->mqtt_server=server;
+	this->mqtt_port=port;
+}
+
+void ESP8266_XYZ::MQTTTSetServer(String server, int port, String user, String pass){
+	this->mqtt_server=server;
+	this->mqtt_port=port;
+	this->mqtt_user=user;
+	this->mqtt_pass=pass;
+}
+
+void ESP8266_XYZ::MQTTConfig(String id, int retries, int delay_ms){
+	this->mqtt_id=id;
+	this->mqtt_retries=retries;
+	this->mqtt_delay_ms=delay_ms;
+}
+
+void ESP8266_XYZ::MQTTSetCallback(std::function<void(char*, uint8_t*, unsigned int)> callback) {
+    clientMQTT.setCallback(callback);
+}
+
+bool ESP8266_XYZ::MQTTPublish(const char* topic){
+	if(!MQTTConnected()){
+		if (!MQTTReconnect(mqtt_id.c_str(), mqtt_retries, mqtt_delay_ms)){
+			return false;
+		}
+	}
+	uint16_t json_len = json.length();
+	json.setCharAt(json_len-1, '}');
+	clientMQTT.publish(topic,json.c_str());
+	json="{";
+	return true;
+}
+
+bool ESP8266_XYZ::MQTTPublish(const char* topic, boolean retained){
+	if(!MQTTConnected()){
+		if (!MQTTReconnect(mqtt_id.c_str(), mqtt_retries, mqtt_delay_ms)){
+			return false;
+		}
+	}
+	uint16_t json_len = json.length();
+	json.setCharAt(json_len-1, '}');
+	clientMQTT.publish(topic,json.c_str(),retained);
+	json="{";
+	return true;
+}
+
+bool ESP8266_XYZ::MQTTSubscribe(const char* topic){
+	if(!MQTTConnected()){
+		if (!MQTTReconnect(mqtt_id.c_str(), mqtt_retries, mqtt_delay_ms)){
+			return false;
+		}
+	}
+	return clientMQTT.subscribe(topic);
+}
+
+void ESP8266_XYZ::MQTTLoop(){
+	clientMQTT.loop();
+}
+
+bool ESP8266_XYZ::MQTTConnected(){
+	return clientMQTT.connected();
+}
+
+bool ESP8266_XYZ::MQTTReconnect(const char* id, int retries, int delay_ms){
+	int i=0;
+	clientMQTT.setServer(mqtt_server.c_str(), mqtt_port);
+	while (!clientMQTT.connected()) {
+#ifdef DEBUG
+		Serial.print("Attempting MQTT connection...");
+#endif
+		if (clientMQTT.connect(id,mqtt_user.c_str(),mqtt_pass.c_str())) {
+#ifdef DEBUG
+			Serial.println("connected");
+#endif
+		} else {
+#ifdef DEBUG
+			Serial.print("failed, rc=");
+			Serial.print(clientMQTT.state());
+			Serial.println(" try again in 5 seconds");
+#endif
+			delay(delay_ms);
+		}
+		if(i<retries){
+			i++;
+		}else{
+			return false;
+		}
+	}
+	return true;
 }
 
 int ESP8266_XYZ::readResponse(String* response) {
@@ -31,9 +137,9 @@ int ESP8266_XYZ::readResponse(String* response) {
 	//de un response HTTP
 	while ((millis() - t) < global_timeout) {
 
-	    if (client.available()) {
+	    if (clientESP.available()) {
 
-	    	char c = client.read();;
+	    	char c = clientESP.read();;
 	    	
 
 		    //Luego del primer espacio se encuentra el cÃ³digo de estado
@@ -41,13 +147,13 @@ int ESP8266_XYZ::readResponse(String* response) {
 		        in_status = true;
 		    }
 
-		    //Se lee el cÃ³digo de estado de 3 dÃ­gitos
-		    if(in_status && i < 3 && c != ' '){////QuÃ© pasa si el cÃ³digo es de 4 digitos???
+		    //Se lee el código de estado de 3 dígitos
+		    if(in_status && i < 3 && c != ' '){////Qué pasa si el código es de 4 digitos???
 		        status_code[i] = c;
 		        i++;
 		    }
 
-		    //Se parsea el cÃ³digo de char* a int
+		    //Se parsea el código de char* a int
 		    if(i == 3){
 		        status_code[i] = '\0';
 		        code = atoi(status_code);
@@ -84,7 +190,7 @@ bool ESP8266_XYZ::connectServer(const char* server, int port){
 	uint32_t t = millis();
 	bool connected = false;
 	do {
-    	connected = client.connect(server, port);
+    	connected = clientESP.connect(server, port);
     	delay(500);
   	} while (!connected && (millis() - t) < global_timeout);
   	return connected;
@@ -109,7 +215,7 @@ int ESP8266_XYZ::httpPost(const char* server, String path, int port, String *res
 	server_str += ":";
 	server_str += String(port);
 
-	//CÃ¡lculo de lengitud total del mensaje
+	//Cálculo de lengitud total del mensaje
 	uint16_t json_len = json.length();
 
 	json.setCharAt(json_len-1, '}');
@@ -130,11 +236,11 @@ int ESP8266_XYZ::httpPost(const char* server, String path, int port, String *res
 	msg += json;
 
 	#ifdef DEBUG 
-			Serial.print("Request: ");
+			Serial.println("Request: ");
 			Serial.println(msg);
 	#endif
 	
-	client.print(msg);
+	clientESP.print(msg);
 	//Reestablece el JSON para el siguiente POST
 	json = "{";
 
@@ -168,11 +274,13 @@ int ESP8266_XYZ::httpGet(const char* server, String path, int port, String *resp
     msg += " HTTP/1.1\r\nHost: ";
    	msg += server_str;
 	msg += "\r\n\r\n";
+	#ifdef DEBUG
+		Serial.println(msg);
+	#endif
+	//Se envía el mensaje al servidor
+	clientESP.print(msg);
 
-	//Se envÃ­a el mensaje al servidor
-	client.print(msg);
-
-	//Se obtiene el cÃ³digo de estado de la solicitud
+	//Se obtiene el código de estado de la solicitud
 	return readResponse(response);
 }
 
