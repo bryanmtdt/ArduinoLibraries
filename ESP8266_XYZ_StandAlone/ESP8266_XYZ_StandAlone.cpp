@@ -162,7 +162,15 @@ int ESP8266_XYZ::readResponse(String* response) {
 		    if(http_body){
 		    	//Si se detecta el cuerpo de la respuesta
 		    	//se escribe en response (si existe)
-		   		if(response != NULL) response->concat(c);
+		   		if(response != NULL){
+		   			response->concat(c);
+		   			if(c=='}'){
+		   				break;
+		   			}
+		   		}else{
+		   			break;
+		   		}
+
 		    } else {	
 		    	//Condiciones para detectar el cuerpo de la respuesta
 		        if (c == '\n' && line_blank) {
@@ -228,7 +236,7 @@ int ESP8266_XYZ::httpPost(const char* server, String path, int port, String *res
 	msg += path;
 	msg += " HTTP/1.1\r\nHost: ";
 	msg += server_str;
-	msg += "\r\nConnection: close\r\n";
+	msg += "\r\nConnection: keep-alive\r\n";
 	msg += "Accept: application/json\r\n";
 	msg += "Content-Type: application/json\r\nContent-Length:";
 	msg += json_len;
